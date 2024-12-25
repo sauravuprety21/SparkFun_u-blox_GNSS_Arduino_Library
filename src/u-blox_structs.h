@@ -2050,6 +2050,37 @@ typedef struct
   UBX_TIM_TM2_data_t *callbackData;
 } UBX_TIM_TM2_t;
 
+// UBX-TIM-TP (0x0D 0x01): Time pulse data
+const uint16_t UBX_TIM_TP_LEN = 16;
+
+typedef struct
+{
+  uint32_t towMS;     // Time pulse time of week according to time base: ms
+  uint32_t towSubMS;  // Submillisecond part of towMS:  ms
+  int32_t qErr;       // Quantization error of time pulse: ps
+  uint16_t week;      // Time pulse week number according to time base: weeks
+  
+  union
+  {
+    uint8_t all;
+    struct
+    {
+      uint8_t timeBase : 1;       // 0=Time base is GNSS time; 1=Time base is UTC
+      uint8_t utc : 1;             // 0=UTC not available; 1=UTC available
+      uint8_t raim : 2;           // 0=Information not available; 1=Not active; 2=Active
+      uint8_t qErrInvalid : 1;    // 0=Quantization error valid; 1=Quantization error invalid
+    } bits;
+  } flags;
+
+  union{
+    uint8_t all;
+    struct{
+      uint8_t timeRefGnss : 4;  //0=GPS; 1=GLONASS; 2=BeiDou; 3=Galileo; 15=Unknown
+      uint8_t utcStandard : 4; 
+    } bits;
+  } refInfo;
+} UBX_TIM_TP_data_t;
+
 // ESF-specific structs
 
 // UBX-ESF-ALG (0x10 0x14): IMU alignment information
