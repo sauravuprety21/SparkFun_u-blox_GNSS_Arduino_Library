@@ -2106,6 +2106,16 @@ typedef struct
   } moduleQueried;
 } UBX_TIM_TP_moduleQueried_t;
 
+typedef struct
+{
+  ubxAutomaticFlags automaticFlags;
+  UBX_TIM_TP_data_t data;
+  UBX_TIM_TP_moduleQueried_t moduleQueried;
+  void (*callbackPointer)(UBX_TIM_TP_data_t);
+  void (*callbackPointerPtr)(UBX_TIM_TP_data_t *);
+  UBX_TIM_TP_data_t *callbackData;
+} UBX_TIM_TP_t;
+
 // ESF-specific structs
 
 // UBX-ESF-ALG (0x10 0x14): IMU alignment information
