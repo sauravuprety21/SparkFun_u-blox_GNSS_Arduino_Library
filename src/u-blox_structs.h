@@ -2081,6 +2081,31 @@ typedef struct
   } refInfo;
 } UBX_TIM_TP_data_t;
 
+typedef struct
+{
+  union
+  {
+    uint32_t all;
+    struct
+    {
+      uint32_t all : 1;
+      
+      uint32_t towMS : 1;
+      uint32_t towSubMS : 1;
+      uint32_t qErr : 1;
+      uint32_t week : 1;
+
+      uint32_t timeBase : 1;
+      uint32_t utc : 1;
+      uint32_t raim : 1;
+      uint32_t qErrInvalid : 1;
+
+      uint32_t timeRefGnss : 1;
+      uint32_t utcStandard : 1;
+    } bits;
+  } moduleQueried;
+} UBX_TIM_TP_moduleQueried_t;
+
 // ESF-specific structs
 
 // UBX-ESF-ALG (0x10 0x14): IMU alignment information
