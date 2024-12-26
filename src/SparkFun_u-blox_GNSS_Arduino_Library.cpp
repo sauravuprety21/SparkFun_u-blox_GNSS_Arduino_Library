@@ -14290,6 +14290,71 @@ void SFE_UBLOX_GNSS::logTIMTM2(bool enabled)
   packetUBXTIMTM2->automaticFlags.flags.bits.addToFileBuffer = (uint8_t)enabled;
 }
 
+// ***** TIM TP automatic support
+
+bool SFE_UBLOX_GNSS::getTIMTP(uint16_t maxWait)
+{
+  if (packetUBXTIMTP == NULL)
+    initPacketUBXTIMTP();     // Check that RAM has been allocated for the TP data
+  if (packetUBXTIMTP == NULL) // Bail if the RAM allocation failed
+    return (false);
+
+  if (packetUBXTIMTP->automaticFlags.flags.bits.automatic && packetUBXTIMTP->automaticFlags.flags.bits.implicitUpdate)
+  {
+    // The GPS is automatically reporting, we just check whether we got unread data
+    checkUbloxInternal(&packetCfg, UBX_CLASS_TIM, UBX_TIM_TP);
+    return packetUBXTIMTP->moduleQueried.moduleQueried.bits.all;
+  }
+  else if (packetUBXTIMTP->automaticFlags.flags.bits.automatic && !packetUBXTIMTP->automaticFlags.flags.bits.implicitUpdate)
+  {
+    // Someone else has to call checkUblox for us...
+    return (false);
+  }
+  else
+  {
+    // The GPS is not automatically reporting navigation position so we have to poll explicitly
+    packetCfg.cls = UBX_CLASS_TIM;
+    packetCfg.id = UBX_TIM_TP;
+    packetCfg.len = 0;
+    packetCfg.startingSpot = 0;
+
+    // The data is parsed as part of processing the response
+    sfe_ublox_status_e retVal = sendCommand(&packetCfg, maxWait);
+
+    if (retVal == SFE_UBLOX_STATUS_DATA_RECEIVED)
+      return (true);
+
+    if (retVal == SFE_UBLOX_STATUS_DATA_OVERWRITTEN)
+    {
+      return (true);
+    }
+
+    return (false);
+  }
+}
+
+// PRIVATE: Allocate RAM for packetUBXTIMTP and initialize it
+bool SFE_UBLOX_GNSS::initPacketUBXTIMTP()
+{
+  packetUBXTIMTP = new UBX_TIM_TP_t; // Allocate RAM for the main struct
+  if (packetUBXTIMTP == NULL)
+  {
+#ifndef SFE_UBLOX_REDUCED_PROG_MEM
+    if ((_printDebug == true) || (_printLimitedDebug == true)) // This is important. Print this if doing limited debugging
+      _debugSerial->println(F("initPacketUBXTIMTP: RAM alloc failed!"));
+#endif
+    return (false);
+  }
+  packetUBXTIMTP->automaticFlags.flags.all = 0;
+  packetUBXTIMTP->callbackPointer = NULL;
+  packetUBXTIMTP->callbackPointerPtr = NULL;
+  packetUBXTIMTP->callbackData = NULL;
+  packetUBXTIMTP->moduleQueried.moduleQueried.all = 0;
+  return (true);
+}
+
+
+
 // ***** ESF ALG automatic support
 
 bool SFE_UBLOX_GNSS::getEsfAlignment(uint16_t maxWait)

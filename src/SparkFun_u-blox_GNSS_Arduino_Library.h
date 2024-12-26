@@ -1291,6 +1291,16 @@ public:
   void flushTIMTM2();                                                                                                 // Mark all the data as read/stale
   void logTIMTM2(bool enabled = true);                                                                                // Log data to file buffer
 
+  bool getTIMTP(uint16_t maxWait = defaultMaxWait);                                                                  // TIM TP 
+  bool setAutoTIMTP(bool enabled, uint16_t maxWait = defaultMaxWait);                                                // Enable/disable automatic TIM TP reports at the navigation frequency
+  bool setAutoTIMTP(bool enabled, bool implicitUpdate, uint16_t maxWait = defaultMaxWait);                           // Enable/disable automatic TIM TP reports at the navigation frequency, with implicitUpdate == false accessing stale data will not issue parsing of data in the rxbuffer of your interface, instead you have to call checkUblox when you want to perform an update
+  bool setAutoTIMTPrate(uint8_t rate, bool implicitUpdate = true, uint16_t maxWait = defaultMaxWait);                // Set the rate for automatic TIM TP reports
+  bool setAutoTIMTPcallback(void (*callbackPointer)(UBX_TIM_TP_data_t), uint16_t maxWait = defaultMaxWait);         // Enable automatic TP reports at the navigation frequency. Data is accessed from the callback.
+  bool setAutoTIMTPcallbackPtr(void (*callbackPointerPtr)(UBX_TIM_TP_data_t *), uint16_t maxWait = defaultMaxWait); // Enable automatic TP reports at the navigation frequency. Data is accessed from the callback.
+  bool assumeAutoTIMTP(bool enabled, bool implicitUpdate = true);                                                    // In case no config access to the GPS is possible and TIM TP is send cyclically already
+  void flushTIMTP();                                                                                                 // Mark all the data as read/stale
+  void logTIMTP(bool enabled = true);                                                                                // Log data to file buffer
+
   // Sensor fusion (dead reckoning) (ESF)
 
   bool getEsfAlignment(uint16_t maxWait = defaultMaxWait);                                                            // ESF ALG Helper
@@ -1616,6 +1626,7 @@ public:
   UBX_CFG_RATE_t *packetUBXCFGRATE = NULL; // Pointer to struct. RAM will be allocated for this if/when necessary
 
   UBX_TIM_TM2_t *packetUBXTIMTM2 = NULL; // Pointer to struct. RAM will be allocated for this if/when necessary
+  UBX_TIM_TP_t *packetUBXTIMTP = NULL;  // Pointer to struct. RAM will be allocated for this if/when necessary
 
   UBX_ESF_ALG_t *packetUBXESFALG = NULL;       // Pointer to struct. RAM will be allocated for this if/when necessary
   UBX_ESF_INS_t *packetUBXESFINS = NULL;       // Pointer to struct. RAM will be allocated for this if/when necessary
@@ -1707,6 +1718,7 @@ private:
   bool initPacketUBXCFGPRT();           // Allocate RAM for packetUBXCFGPRT and initialize it
   bool initPacketUBXCFGRATE();          // Allocate RAM for packetUBXCFGRATE and initialize it
   bool initPacketUBXTIMTM2();           // Allocate RAM for packetUBXTIMTM2 and initialize it
+  bool initPacketUBXTIMTP();           // Allocate RAM for packetUBXTIMTP and initialize it
   bool initPacketUBXESFALG();           // Allocate RAM for packetUBXESFALG and initialize it
   bool initPacketUBXESFSTATUS();        // Allocate RAM for packetUBXESFSTATUS and initialize it
   bool initPacketUBXESFINS();           // Allocate RAM for packetUBXESFINS and initialize it
