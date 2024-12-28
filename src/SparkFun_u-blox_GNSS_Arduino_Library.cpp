@@ -1448,6 +1448,10 @@ bool SFE_UBLOX_GNSS::checkAutomatic(uint8_t Class, uint8_t ID)
       if (packetUBXTIMTM2 != NULL)
         result = true;
       break;
+    case UBX_TIM_TP:
+      if (packetUBXTIMTP != NULL)
+        result = true;
+      break;
     }
   }
   break;
@@ -1627,6 +1631,9 @@ uint16_t SFE_UBLOX_GNSS::getMaxPayloadSize(uint8_t Class, uint8_t ID)
     {
     case UBX_TIM_TM2:
       maxSize = UBX_TIM_TM2_LEN;
+      break;
+    case UBX_TIM_TP:
+      maxSize = UBX_TIM_TP_LEN;
       break;
     }
   }
@@ -4159,6 +4166,36 @@ void SFE_UBLOX_GNSS::processUBXpacket(ubxPacket *msg)
 
         // Check if we need to copy the data into the file buffer
         if (packetUBXTIMTM2->automaticFlags.flags.bits.addToFileBuffer)
+        {
+          storePacket(msg);
+        }
+      }
+    }
+    else if (msg->id == UBX_TIM_TP && msg->len == UBX_TIM_TP_LEN)
+    {
+      // Parse various byte fields into storage - but only if we have memory allocated for it
+      if (packetUBXTIMTP != NULL)
+      {
+        packetUBXTIMTP->data.towMS = extractLong(msg, 0);
+        packetUBXTIMTP->data.towSubMS = extractLong(msg, 4);
+        packetUBXTIMTP->data.qErr = extractSignedLong(msg, 8);
+        packetUBXTIMTP->data.week = extractInt(msg, 12);
+        packetUBXTIMTP->data.flags.all = extractByte(msg, 14);
+        packetUBXTIMTP->data.refInfo.all = extractByte(msg, 15);
+
+        // Mark all datums as fresh (not read before)
+        packetUBXTIMTP->moduleQueried.moduleQueried.all = 0xFFFFFFFF;
+
+        // Check if we need to copy the data for the callback
+        if ((packetUBXTIMTP->callbackData != NULL)                                     // If RAM has been allocated for the copy of the data
+            && (packetUBXTIMTP->automaticFlags.flags.bits.callbackCopyValid == false)) // AND the data is stale
+        {
+          memcpy(&packetUBXTIMTP->callbackData->towMS, &packetUBXTIMTP->data.towMS, sizeof(UBX_TIM_TP_data_t));
+          packetUBXTIMTP->automaticFlags.flags.bits.callbackCopyValid = true;
+        }
+
+        // Check if we need to copy the data into the file buffer
+        if (packetUBXTIMTP->automaticFlags.flags.bits.addToFileBuffer)
         {
           storePacket(msg);
         }
