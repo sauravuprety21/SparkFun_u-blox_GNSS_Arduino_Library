@@ -396,6 +396,16 @@ void SFE_UBLOX_GNSS::end(void)
     delete packetUBXTIMTM2;
     packetUBXTIMTM2 = NULL; // Redundant?
   }
+  
+  if (packetUBXTIMTP != NULL)
+  {
+    if (packetUBXTIMTP->callbackData != NULL)
+    {
+      delete packetUBXTIMTP->callbackData;
+    }
+    delete packetUBXTIMTP;
+    packetUBXTIMTP = NULL; // Redundant?
+  }
 
   if (packetUBXESFALG != NULL)
   {
