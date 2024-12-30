@@ -5740,6 +5740,24 @@ void SFE_UBLOX_GNSS::checkCallbacks(void)
     packetUBXTIMTM2->automaticFlags.flags.bits.callbackCopyValid = false; // Mark the data as stale
   }
 
+  if ((packetUBXTIMTP != NULL)                                                  // If RAM has been allocated for message storage
+      && (packetUBXTIMTP->callbackData != NULL)                                 // If RAM has been allocated for the copy of the data
+      && (packetUBXTIMTP->automaticFlags.flags.bits.callbackCopyValid == true)) // If the copy of the data is valid
+  {
+    if (packetUBXTIMTP->callbackPointer != NULL) // If the pointer to the callback has been defined
+    {
+      // if (_printDebug == true)
+      //   _debugSerial->println(F("checkCallbacks: calling callback for TIM TP"));
+      packetUBXTIMTP->callbackPointer(*packetUBXTIMTP->callbackData); // Call the callback
+    }
+    if (packetUBXTIMTP->callbackPointerPtr != NULL) // If the pointer to the callback has been defined
+    {
+      // if (_printDebug == true)
+      //   _debugSerial->println(F("checkCallbacks: calling callbackPtr for TIM TP"));
+      packetUBXTIMTP->callbackPointerPtr(packetUBXTIMTP->callbackData); // Call the callback
+    }
+    packetUBXTIMTP->automaticFlags.flags.bits.callbackCopyValid = false; // Mark the data as stale
+  }
   if ((packetUBXESFALG != NULL)                                                  // If RAM has been allocated for message storage
       && (packetUBXESFALG->callbackData != NULL)                                 // If RAM has been allocated for the copy of the data
       && (packetUBXESFALG->automaticFlags.flags.bits.callbackCopyValid == true)) // If the copy of the data is valid
